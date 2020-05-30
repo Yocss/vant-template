@@ -15,7 +15,7 @@ const routes = [
     path: '/news',
     name: 'NewsIndex',
     component: () => import('@/pages/news/index.vue'),
-    meta: { title: '新闻页', layout: 'default' }
+    meta: { title: '发现', layout: 'default' }
   },
   {
     path: '*',
