@@ -1,0 +1,32 @@
+.dot
+  overflow hidden
+  word-wrap normal
+  white-space nowrap
+  text-overflow ellipsis
+.dot2
+.dot--l2
+.dot--l3
+.dot3
+  display: -webkit-box
+  overflow: hidden
+  text-overflow: ellipsis
+  -webkit-line-clamp: 2
+  -webkit-box-orient: vertical
+.dot3
+.dot--l3
+  -webkit-line-clamp: 3
+
+// 模糊效果
+.filter
+  backdrop-filter blur(15px)
+  -webkit-backdrop-filter blur(15px)
+// 渐隐效果
+.fade-enter-active, .fade-leave-active
+  transition opacity .35s
+.fade-enter, .fade-leave-to
+  opacity 0
+@keyframes yo-rotate
+  from
+    transform: rotate(0deg)
+  to
+    transform: rotate(360deg)
