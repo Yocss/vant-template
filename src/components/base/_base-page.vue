@@ -1,41 +1,53 @@
 <template>
-  <div class="base-page">
+  <div
+    :class="{ 'show-head': head }"
+    class="base-page"
+  >
+    <!-- header -->
+    <div
+      v-show="head"
+      class="base-page-hd"
+    >
+      <slot name="header">
+        <app-header />
+      </slot>
+    </div>
+    <!-- /header -->
+
+    <!-- body -->
     <div class="base-page-bd">
-      <!-- does the page need login -->
+      <!-- allow show page without logged -->
       <template v-if="allowShow">
         <slot />
       </template>
       <template v-else>
-        <base-empty title="你还没有登录，请登录后继续" />
+        <base-empty
+          :call-back="login"
+          title="您还没有登录，请登录后继续"
+          button="立即登录"
+        />
       </template>
     </div>
-    <!-- loading status -->
-    <div v-show="loading" class="base-page-loading">
-      <van-loading
-        type="spinner"
-        color="#333"
-        vertical
-      >
-        拼命加载中...
-      </van-loading>
-    </div>
+    <!-- /body -->
   </div>
 </template>
 <script>
 import { Loading } from 'vant'
+import AppHeader from '@/components/common/app-header.vue'
 export default {
   name: 'BasePage',
   components: {
-    [Loading.name]: Loading
+    [Loading.name]: Loading,
+    AppHeader
   },
   props: {
-    loading: {
-      type: Boolean,
-      default: false
-    },
     needLogin: {
       type: Boolean,
       default: false
+    },
+    head: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {
@@ -46,6 +58,32 @@ export default {
       }
       return bool
     }
+  },
+  methods: {
+    login () {
+      console.log('do login')
+    }
   }
 }
 </script>
+<style lang="stylus">
+@import '~@/assets/css/common/variables.styl'
+.base-page
+  width 100%
+  height @width
+  $headHeight = $font * 3
+  &.show-head
+    padding-top $headHeight
+    &>.base-page-hd
+      display block
+  &-hd
+    display none
+    position absolute
+    left 0
+    top 0
+    width @width
+    height $headHeight
+  &-bd
+    width @width
+    height @width
+</style>
