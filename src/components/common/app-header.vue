@@ -14,7 +14,7 @@
       v-text="tit"
     />
     <div
-      v-show="showRight"
+      :class="{ show: right }"
       class="right flex-align-center justify-end"
       @click="handleClick('right')"
     >
@@ -49,18 +49,16 @@ export default {
     showLeft () {
       return typeof this.left !== 'boolean'
     },
-    showRight () {
-      return typeof this.right !== 'boolean'
-    },
     tit () {
       const tit = this.$route.meta.title || ''
-      let res = ''
-      if (typeof this.title === 'boolean') {
-        res = this.title ? tit : ''
-      } else {
-        res = this.title
+      switch (typeof this.title) {
+        case 'boolean':
+          return this.title ? tit : ''
+        case 'string':
+          return this.title || tit
+        default:
+          return ''
       }
-      return res
     }
   },
   methods: {
@@ -73,7 +71,14 @@ export default {
         }
         case 'right': {
           const fn = this.right
-          fn ? fn() : this.$emit('click', 'right')
+          switch (typeof fn) {
+            case 'boolean':
+              fn && this.$emit('click', 'right')
+              break
+            case 'function':
+              fn()
+              break
+          }
           break
         }
       }
@@ -98,6 +103,11 @@ export default {
     padding-left $font
   .right
     padding-right $font
+    &>*
+      display none
+    &.show
+      &>*
+        display block
   .middle
     width 50%
     height 100%
