@@ -1,9 +1,13 @@
 <template>
-  <router-link
-    to="/"
+  <base-page
+    class="news-index"
   >
-    回首页
-  </router-link>
+    <router-link
+      to="/"
+    >
+      回首页
+    </router-link>
+  </base-page>
 </template>
 <script>
 export default {
