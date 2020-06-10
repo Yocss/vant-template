@@ -5,15 +5,18 @@ Vue.mixin({
   computed: {
     isLogin () {
       return this.$store.state.token
+    },
+    route () {
+      return this.$store.state.route
     }
   },
   methods: {
     /**
-     * 返回上一页，(无上一页时的处理方案未确定）
+     * 返回上一页，(无上一页时重定向至首页）
      * @param {*} step 返回步数
      */
     goBack (step = -1) {
-      this.$router.go(step)
+      this.route.from ? this.$router.go(step) : this.$router.replace('/')
       return true
     },
 

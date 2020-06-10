@@ -25,6 +25,9 @@ import LayoutsHome from './home.vue'
 export default {
   name: 'AppContainer',
   computed: {
+    route () {
+      return this.$store.state.route
+    },
     loading () {
       return this.$store.state.loading
     },

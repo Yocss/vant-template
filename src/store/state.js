@@ -1,4 +1,8 @@
 export default {
   layout: 'default',
-  loading: false
+  loading: false,
+  route: {
+    to: null,
+    from: null
+  }
 }

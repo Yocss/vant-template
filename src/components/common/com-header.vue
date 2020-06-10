@@ -1,5 +1,5 @@
 <template>
-  <div class="app-header flex-between-center van-hairline--bottom">
+  <div class="com-header flex-between-center van-hairline--bottom">
     <div
       v-show="showLeft"
       class="left flex-align-center"
@@ -88,7 +88,7 @@ export default {
 </script>
 <style lang="stylus">
 @import '~@/assets/css/common/variables.styl'
-.app-header
+.com-header
   width 100%
   height $font * 3
   .left

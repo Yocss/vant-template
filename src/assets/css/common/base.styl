@@ -30,3 +30,25 @@
     transform: rotate(0deg)
   to
     transform: rotate(360deg)
+// slide-left
+.slideIn-enter-active
+.slideIn-leave-active
+  position absolute
+  top 0
+  right 0
+  width 100%
+  height 100%
+  overflow hidden
+  transition right 3s
+  background-color #fff
+.slideIn-leave-active
+.slideIn-leave-to
+  right 0
+.slideIn-enter-active
+  z-index 2
+.slideIn-leave-active
+  z-index 1
+.slideIn-enter
+  position absolute
+  top 0
+  right -100%

@@ -9,7 +9,7 @@
       class="base-page-hd"
     >
       <slot name="header">
-        <app-header />
+        <com-header />
       </slot>
     </div>
     <!-- /header -->
@@ -33,12 +33,12 @@
 </template>
 <script>
 import { Loading } from 'vant'
-import AppHeader from '@/components/common/app-header.vue'
+import ComHeader from '@/components/common/com-header.vue'
 export default {
   name: 'BasePage',
   components: {
     [Loading.name]: Loading,
-    AppHeader
+    ComHeader
   },
   props: {
     needLogin: {
@@ -70,7 +70,7 @@ export default {
 @import '~@/assets/css/common/variables.styl'
 .base-page
   width 100%
-  height @width
+  // height @width
   $headHeight = $font * 3
   &.show-head
     padding-top $headHeight

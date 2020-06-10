@@ -7,16 +7,23 @@ import store from '@/store/index.js'
 import { analytics } from './analytics.js'
 
 function hooks () {
-  // global before router enter
+  // global hook before router enter
   router.beforeEach(async function (to, from, next) {
     // page layout
     setLayout(to)
     next()
   })
-  // global after router enter
+  // global hook after router enter
   router.afterEach((to, from) => {
-    // cnzz analytics, work in production env
-    // cnzz 页面访问统计, 仅在 production 环境下生效
+    if (window) {
+      store.dispatch('SetStore', {
+        route: {
+          from: from.name,
+          to: to.name
+        }
+      })
+    }
+    // cnzz analytics, work in production only
     analytics(to.fullPath, from.fullPath)
   })
 }

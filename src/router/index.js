@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-// import Home from '../pages/Home.vue'
+import News from './pages/news.js'
 
 Vue.use(VueRouter)
 
@@ -9,14 +9,9 @@ const routes = [
     path: '/',
     name: 'HomeIndex',
     component: () => import('@/pages/index.vue'),
-    meta: { title: '首页', layout: 'home' }
+    meta: { title: '首页' }
   },
-  {
-    path: '/news',
-    name: 'NewsIndex',
-    component: () => import('@/pages/news/index.vue'),
-    meta: { title: '发现', layout: 'default' }
-  },
+  ...News,
   {
     path: '*',
     name: 'Error',
