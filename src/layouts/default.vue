@@ -1,26 +1,30 @@
 <template>
-  <!-- <div class="layouts-default"> -->
-  <transition :name="animate">
-      <router-view class="layouts-default" />
-  </transition>
-  <!-- </div> -->
+  <div class="layouts-default">
+    <transition
+      :name="animate"
+      type="animation"
+    >
+      <router-view @animationend.native="onAnimated" />
+    </transition>
+  </div>
 </template>
 <script>
 export default {
   name: 'LayoutsDefault',
   data () {
     return {
-      animate: 'slideIn'
+      // animate: 'slideIn'
     }
   },
-  watch: {
-    '$route' (to, from) {
-      // console.log(to)
-      const toLen = to.path.split('/').length
-      const fromLen = from.path.split('/').length
-      // this.animate = toLen < fromLen ? 'slideIn' : 'slideOut'
-      console.log(toLen, fromLen)
-      console.log(this.animate)
+  computed: {
+    animate () {
+      return this.$store.state.animate
+    }
+  },
+  methods: {
+    // 监听过渡动画结束 event， 结束后将animate置为'',以解除对.app的overflow:hidden限制
+    onAnimated () {
+      this.$store.dispatch('SetStore', { animate: '' })
     }
   }
 }

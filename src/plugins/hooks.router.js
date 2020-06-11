@@ -15,14 +15,16 @@ function hooks () {
   })
   // global hook after router enter
   router.afterEach((to, from) => {
-    if (window) {
-      store.dispatch('SetStore', {
-        route: {
-          from: from.name,
-          to: to.name
-        }
-      })
+    // 页面进入和退出效果
+    const route = { ...store.state.route }
+    let animate = ''
+    if (from.name) {
+      const isBack = route.from === to.name
+      animate = isBack ? 'slideOut' : 'slideIn'
     }
+    store.dispatch('SetStore', { animate })
+    // 记录上一次路由
+    store.dispatch('SetStore', { route: { from: from.name, to: to.name } })
     // cnzz analytics, work in production only
     analytics(to.fullPath, from.fullPath)
   })

@@ -1,5 +1,8 @@
 <template>
-  <div class="app">
+  <div
+    :class="{ animate: animate }"
+    class="app"
+  >
     <!-- set page layout by router meta -->
     <templates
       v-if="template"
@@ -25,6 +28,9 @@ import LayoutsHome from './home.vue'
 export default {
   name: 'AppContainer',
   computed: {
+    animate () {
+      return this.$store.state.animate
+    },
     route () {
       return this.$store.state.route
     },
@@ -47,8 +53,11 @@ export default {
 <style lang="stylus">
 .app
 .layout
+  position relative
   width 100%
   height 100%
+.app.animate
+  overflow hidden
 .layout
   z-index 1
   &-loading
