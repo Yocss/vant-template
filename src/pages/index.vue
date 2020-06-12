@@ -9,7 +9,7 @@
 </template>
 <script>
 export default {
-  name: 'HomeIndex'
+  name: 'HomeIndex',
   // computed: {
   //   loading () {
   //     return this.$store.state.loading
@@ -20,6 +20,15 @@ export default {
   //     this.$store.dispatch('SetStore', { loading: !this.loading })
   //   }, 3000)
   // }
+  created () {
+    this.asyncData()
+  },
+  methods: {
+    async asyncData () {
+      const data = await this.$http.post('test')
+      console.log(data)
+    }
+  }
 }
 </script>
 

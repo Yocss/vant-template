@@ -50,35 +50,40 @@ axios.interceptors.request.use(
 // 响应拦截
 axios.interceptors.response.use(
   (response) => {
-    const { data } = response
-    if (data.code !== undefined) {
-      data.code *= 1
-      return req.error.includes(data.code) ? Promise.reject(data) : data
-    } else {
-      const res = { code: 500, data, info: '程序君太累了，工程师正在处理(500)' }
-      if (data === '') {
-        res.code = 501
-        res.info = '程序君异常，工程师正在处理(501)'
-      }
-      return Promise.reject(res)
-    }
+    const { data, status } = response
+    return { code: status, data }
+    // if (data.code !== undefined) {
+    //   data.code *= 1
+    //   return req.error.includes(data.code) ? Promise.reject(data) : data
+    // } else {
+    //   const res = { code: 500, data, info: '程序君太累了，工程师正在处理(500)' }
+    //   if (data === '') {
+    //     res.code = 501
+    //     res.info = '程序君异常，工程师正在处理(501)'
+    //   }
+    //   return Promise.reject(res)
+    // }
   },
   (err) => {
-    const data = {}
+    const data = {
+      code: err.response.status || 0,
+      data: err.response.data
+    }
+
     // let code = app.data().isOnline ? 600 : 601
-    let code = 600
-    const info = {
-    }
-    if (err.response) {
-      code = err.response.status
-      data.code = code
-      data.data = err.response.data
-      data.info = info[code] || `系统异常（${code}）`
-    } else {
-      data.code = 600
-      data.data = err.response.data
-      data.info = '网络似乎不太通畅，请检查网络后重试'
-    }
+    // let code = 600
+    // const info = {
+    // }
+    // if (err.response) {
+    //   code = err.response.status
+    //   data.code = code
+    //   data.data = err.response.data
+    //   data.info = info[code] || `系统异常（${code}）`
+    // } else {
+    //   data.code = 600
+    //   data.data = err.response.data
+    //   data.info = '网络似乎不太通畅，请检查网络后重试'
+    // }
     return Promise.reject(data)
   }
 )
