@@ -15,7 +15,7 @@ function hooks () {
   })
   // global hook after router enter
   router.afterEach((to, from) => {
-    // 页面进入和退出效果
+    // 设置页面转场效果
     let animate = ''
     if (from.name) {
       if (to.path === from.path) {
