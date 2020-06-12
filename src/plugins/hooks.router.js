@@ -16,15 +16,29 @@ function hooks () {
   // global hook after router enter
   router.afterEach((to, from) => {
     // 页面进入和退出效果
-    const route = { ...store.state.route }
     let animate = ''
     if (from.name) {
-      const isBack = route.from === to.name
-      animate = isBack ? 'slideOut' : 'slideIn'
+      if (to.path === from.path) {
+        // 首页同级间跳转转场使用模糊效果处理
+        animate = 'goto'
+      } else {
+        if (from.path.indexOf(to.path) === 0) {
+          // to.path 被包含在 from.path中表示返回
+          animate = 'back'
+          // animate = 'goto'
+        } else if (to.path.indexOf(from.path) === 0) {
+          // from.path 被包含在 to。path中表示前进
+          animate = 'go'
+          // animate = 'goto'
+        } else {
+          // 首页同级间跳转转场使用模糊效果处理
+          animate = 'goto'
+        }
+      }
     }
     store.dispatch('SetStore', { animate })
     // 记录上一次路由
-    store.dispatch('SetStore', { route: { from: from.name, to: to.name } })
+    store.dispatch('SetStore', { route: { from, to } })
     // cnzz analytics, work in production only
     analytics(to.fullPath, from.fullPath)
   })

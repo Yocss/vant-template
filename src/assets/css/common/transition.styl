@@ -1,0 +1,80 @@
+.fade-enter-active, .fade-leave-active
+  transition opacity .35s
+.fade-enter, .fade-leave-to
+  opacity 0
+@keyframes yo-rotate
+  from
+    transform: rotate(0deg)
+  to
+    transform: rotate(360deg)
+$sec = .25s
+$blur = 5px
+.go-enter-active
+.back-leave-active
+.goto-enter-active
+.goto-leave-active
+  position absolute
+  top 0
+  width 100%
+  height 100%
+  overflow hidden
+  background-color #fff
+  box-shadow: 0 0 3px 0 rgba(#000, .15)
+.go-enter-active
+  animation slideGo $sec ease
+.go-leave-active
+  animation slideGoOpacity $sec ease
+.back-enter-active
+  animation slideBackOpacity $sec ease
+  z-index 1
+.back-leave-active
+  animation slideBack $sec ease
+  z-index 2
+.goto-enter-active
+  right 0
+  animation goFade $sec ease
+  z-index 1
+.goto-leave-active
+  z-index 2
+  animation goFadeOpacity $sec ease
+@keyframes goFade
+  from
+    // filter blur($blur)
+    opacity 0
+  to
+    // filter blur(0)
+    opacity 1
+@keyframes goFadeOpacity
+  from
+    filter blur(0)
+    opacity 1
+  to
+    filter blur($blur)
+    opacity 0
+
+@keyframes slideGo
+  from
+    right -100%
+    // filter blur($blur)
+  to
+    right 0
+    // filter blur(0)
+@keyframes slideGoOpacity
+  from
+    opacity 1
+    // filter blur(0)
+  to
+    opacity 0
+    // filter blur($blur)
+@keyframes slideBack
+  from
+    right 0
+  to
+    right -100%
+@keyframes slideBackOpacity
+  from
+    // opacity 0.1
+    filter blur($blur)
+  to
+    // opacity 1
+    filter blur(0)
