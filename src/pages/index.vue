@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     async asyncData () {
-      const data = await this.$http.post('test')
+      const data = await this.$http.post('base')
       console.log(data)
     }
   }

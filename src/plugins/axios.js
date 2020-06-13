@@ -9,8 +9,6 @@ import Vue from 'vue'
 import config from '@/app.config.js'
 import store from '@/store'
 import { Notify, Dialog } from 'vant'
-// const errCode = config.httpRequest.error
-// const successCode = config.httpRequest.success
 const req = config.httpRequest
 // 根据 app.config.axios.dataType 转换 data 类型
 const transform = req.useJson ? {} : {
@@ -50,40 +48,28 @@ axios.interceptors.request.use(
 // 响应拦截
 axios.interceptors.response.use(
   (response) => {
-    const { data, status } = response
-    return { code: status, data }
-    // if (data.code !== undefined) {
-    //   data.code *= 1
-    //   return req.error.includes(data.code) ? Promise.reject(data) : data
-    // } else {
-    //   const res = { code: 500, data, info: '程序君太累了，工程师正在处理(500)' }
-    //   if (data === '') {
-    //     res.code = 501
-    //     res.info = '程序君异常，工程师正在处理(501)'
-    //   }
-    //   return Promise.reject(res)
-    // }
+    const { data } = response
+    try {
+      JSON.stringify(data)
+      return data
+    } catch (err) {
+      return { code: 5000, data: {}, info: '响应错误：未返回预期数据' }
+    }
   },
   (err) => {
-    const data = {
-      code: err.response.status || 0,
-      data: err.response.data
+    let data = {}
+    // const { data } = err.response
+    // console.log('********')
+    // console.log(JSON.stringify(err))
+    // console.log(data)
+    // console.log('********')
+    if (err.message.indexOf('timeout') === 0) {
+      data.info = '请求超时，请检查您的网络是否通畅'
+      data.code = 601
+      data.data = {}
+    } else {
+      data = err.response.data
     }
-
-    // let code = app.data().isOnline ? 600 : 601
-    // let code = 600
-    // const info = {
-    // }
-    // if (err.response) {
-    //   code = err.response.status
-    //   data.code = code
-    //   data.data = err.response.data
-    //   data.info = info[code] || `系统异常（${code}）`
-    // } else {
-    //   data.code = 600
-    //   data.data = err.response.data
-    //   data.info = '网络似乎不太通畅，请检查网络后重试'
-    // }
     return Promise.reject(data)
   }
 )
@@ -102,19 +88,20 @@ function handleError (err) {
 }
 // 记录错误日志
 function errLog (url, data, err) {
-  if (url !== req.errApi && err.code >= 400 && err.code < 600) {
-    const errData = JSON.stringify({
-      code: err.code,
-      message: err.data,
-      info: err.info,
-      interface: url,
-      client: process.client ? 'client' : 'server',
-      device: 'pc',
-      params: data
-    })
-    request(req.errApi, { data: errData })
-  }
+//   if (url !== req.errApi && err.code >= 400 && err.code < 600) {
+//     const errData = JSON.stringify({
+//       code: err.code,
+//       message: err.data,
+//       info: err.info,
+//       interface: url,
+//       client: process.client ? 'client' : 'server',
+//       device: 'pc',
+//       params: data
+//     })
+//     request(req.errApi, { data: errData })
+//   }
 }
+
 // 请求方法
 async function request (url, data, opt, method = 'post', times = req.reTimes) {
   url = url.indexOf('/') === 0 ? url.slice(1) : url
@@ -125,10 +112,9 @@ async function request (url, data, opt, method = 'post', times = req.reTimes) {
   } catch (err) {
     times--
     // 发生严重错误且允许重试时，重新请求
-    // console.log(times)
     if (times > 0 && process.server) {
       // 严重错误，在服务端并且是token无效的时候，清空token后重试
-      if (req.error.includes(err.code)) {
+      if (req.error.includes(err.status)) {
         store.state.token && store.dispatch('SetToken', '')
       }
       const retry = await request(url, data, opt, method, times)
@@ -152,14 +138,17 @@ async function request (url, data, opt, method = 'post', times = req.reTimes) {
  * @param {enum} method 请求方法，只可选post | get
  */
 async function getData (url = '', data = {}, option = {}, tip = true, method = 'post') {
-  const res = await request(url, data, option, method)
-  const bool = req.success.includes(res.code)
-  const result = bool ? res.data || {} : false
+  const response = await request(url, data, option, method)
+  // console.log('-=-=-=-=-=-')
+  // console.log(response)
+  // console.log('-=-=-=-=-=-')
+  const bool = req.success.includes(response.code)
+  const result = bool ? response.data || {} : false
   // 无结果 && tip = true 时弹出提示框
   if (!result && tip) {
     // 严重的错误已交由基础请求函数request()处理，所以此外只需处理一般错误即可
-    if (!req.error.includes(res.code)) {
-      Notify({ type: 'danger', message: res.info || '请求错误，未获取预期数据' })
+    if (!req.error.includes(response.code)) {
+      Notify({ type: 'danger', message: response.info })
     }
   }
   return result
@@ -175,27 +164,3 @@ Vue.prototype.$http = {
     return res
   }
 }
-// // 公共post方法, 返回完整数据
-// inject('post', async function (url = '', data = {}, opt = {}) {
-//   const res = await request(url, data, opt, 'post')
-//   return res
-// })
-
-// // 公共get方法 返回完整数据
-// inject('get', async function (url = '', data = {}, opt = {}) {
-//   const res = await request(url, data, opt, 'get')
-//   return res
-// })
-
-// // 公共http对象，包含post及get方法，直接返回data里的数据, 默认自动弹出错误提示
-// // 因与nuxt兼容问题，fetch方法弃用, 改用$http
-// inject('http', {
-//   async post (url, data, opt = {}, tip = true) {
-//     const res = await getData(url, data, opt, tip, 'post')
-//     return res
-//   },
-//   async get (url, data, opt = {}, tip = true) {
-//     const res = await getData(url, data, opt, tip, 'get')
-//     return res
-//   }
-// })
