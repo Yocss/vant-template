@@ -2,6 +2,7 @@
   <base-page
     class="home-index"
   >
+    <com-player />
     <router-link to="/news">
       去新闻页
     </router-link>
@@ -10,6 +11,9 @@
 <script>
 export default {
   name: 'HomeIndex',
+  components: {
+    ComPlayer: () => import('@/components/common/com-player.vue')
+  },
   // computed: {
   //   loading () {
   //     return this.$store.state.loading
