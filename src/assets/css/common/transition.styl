@@ -7,10 +7,12 @@
     transform: rotate(0deg)
   to
     transform: rotate(360deg)
-$sec = .25s
+$sec = .35s
 $blur = 5px
 .go-enter-active
+.go-leave-active
 .back-leave-active
+.back-enter-active
 .goto-enter-active
 .goto-leave-active
   position absolute
@@ -19,11 +21,27 @@ $blur = 5px
   height 100%
   overflow hidden
   background-color #fff
-  box-shadow: 0 0 3px 0 rgba(#000, .15)
+  // box-shadow: 0 0 3px 0 rgba(#000, .15)
+.go-leave-active
+.go-leave
+.back-enter-active
+.back-enter
+  &:before
+    content ' '
+    display block
+    position absolute
+    left 0
+    top 0
+    width 100%
+    height 100%
+    background-color rgba(#666, .1)
+    z-index 10
 .go-enter-active
   animation slideGo $sec ease
+  z-index 2
 .go-leave-active
   animation slideGoOpacity $sec ease
+  z-index 1
 .back-enter-active
   animation slideBackOpacity $sec ease
   z-index 1
@@ -55,17 +73,13 @@ $blur = 5px
 @keyframes slideGo
   from
     right -100%
-    // filter blur($blur)
   to
     right 0
-    // filter blur(0)
 @keyframes slideGoOpacity
   from
-    opacity 1
-    // filter blur(0)
+    right 0
   to
-    opacity 0
-    // filter blur($blur)
+    right 30%
 @keyframes slideBack
   from
     right 0
@@ -73,8 +87,6 @@ $blur = 5px
     right -100%
 @keyframes slideBackOpacity
   from
-    // opacity 0.1
-    filter blur($blur)
+    right 30%
   to
-    // opacity 1
-    filter blur(0)
+    right 0
