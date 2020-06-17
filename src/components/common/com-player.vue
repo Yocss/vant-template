@@ -1,12 +1,20 @@
 <template>
   <div class="com-player">
     <!-- 播放器 -->
-    <div id="com-player-box" />
+    <div id="com-player-box">
+      <!-- <video class="com-video" data-setup='{}'>
+        <source src="https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4" />
+      </video> -->
+      <video
+        ref="videoPlayer"
+        class="com-player-video"
+      />
+    </div>
   </div>
 </template>
 <script>
-// eslint-disable-next-line
-import '@/assets/js/ckplayer/ckplayer.min.js'
+import 'video.js/dist/video-js.min.css'
+import videojs from 'video.js'
 export default {
   name: 'ComPlayer',
   props: {
@@ -18,7 +26,7 @@ export default {
       type: String,
       default: ''
     },
-    config: {
+    options: {
       type: Object,
       default: () => { return {} }
     }
@@ -32,18 +40,39 @@ export default {
     }
   },
   mounted () {
-    this.$nextTick(() => {
-      this.createPlayer()
+    const player = this.$refs.videoPlayer
+    const options = Object.assign({
+      autoplay: true,
+      controls: true,
+      preload: 'auto',
+      // children: [
+      //   'bigPlayButton',
+      //   'controlBar'
+      // ],
+      // nativeControlsForTouch: true,
+      controlBar: {
+        fullscreenToggle: true
+      },
+      // children: {
+      //   controlBar: {
+      //     fullscreenToggle: false
+      //   }
+      // },
+      // language: 'zh-CN',
+      // responsive: true,
+      // fluid: true,
+      // aspectRatio: '16:9',
+      // poster: '//vjs.zencdn.net/(…)oceans.png',
+      sources: '//vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
+    }, this.options)
+    this.player = videojs(player, options, function onPlayerReady () {
+      console.log('onPlayerReady', this)
     })
   },
   beforeDestroy () {
-    this.clearTimer()
-    if (this.player) {
-      // 移除监听
-      this.removeEvent()
-      // 销毁播放器
-      this.player = null
-    }
+    // this.clearTimer()
+    // 注销播放器
+    this.player && this.player.dispose()
   },
   methods: {
     createPlayer () {
@@ -91,7 +120,7 @@ export default {
     },
     // 播放开始时，开始记录学员的记录
     handlePlay () {
-      console.log('play')
+      // console.log('play')
       this.startLog()
       this.doEmit('play')
     },
@@ -125,6 +154,12 @@ export default {
 </script>
 <style lang="stylus">
 #com-player-box
+  .com-player-video
+    position relative
+    width 100%
+    height auto
   video
     display block
+    width 100%
+    height auto
 </style>
