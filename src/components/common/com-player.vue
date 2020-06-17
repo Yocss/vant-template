@@ -2,18 +2,15 @@
   <div class="com-player">
     <!-- 播放器 -->
     <div id="com-player-box">
-      <!-- <video class="com-video" data-setup='{}'>
-        <source src="https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4" />
-      </video> -->
-      <video
+      <video-js
         ref="videoPlayer"
-        class="com-player-video"
+        class="com-player-video video-js vjs-big-play-centered"
       />
     </div>
   </div>
 </template>
 <script>
-import 'video.js/dist/video-js.min.css'
+import 'video.js/dist/video-js.css'
 import videojs from 'video.js'
 export default {
   name: 'ComPlayer',
@@ -50,16 +47,16 @@ export default {
       //   'controlBar'
       // ],
       // nativeControlsForTouch: true,
-      controlBar: {
-        fullscreenToggle: true
-      },
+      // controlBar: {
+      //   fullscreenToggle: true
+      // },
       // children: {
       //   controlBar: {
       //     fullscreenToggle: false
       //   }
       // },
       // language: 'zh-CN',
-      // responsive: true,
+      responsive: true,
       // fluid: true,
       // aspectRatio: '16:9',
       // poster: '//vjs.zencdn.net/(…)oceans.png',
@@ -153,13 +150,19 @@ export default {
 }
 </script>
 <style lang="stylus">
-#com-player-box
-  .com-player-video
-    position relative
+.com-player
+  display block
+  width 100%
+  height 421.875px
+  #com-player-box
     width 100%
-    height auto
-  video
-    display block
-    width 100%
-    height auto
+    height 100%
+    .com-player-video
+      width 100%
+      height 100%
+      font-size 10PX
+    video
+      display block
+      width 100%
+      height auto
 </style>
