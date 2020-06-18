@@ -12,13 +12,12 @@
 <script>
 import 'video.js/dist/video-js.min.css'
 import videojs from 'video.js'
-import { IS_IOS } from '@/assets/js/utils/platform.js'
 export default {
   name: 'ComPlayer',
   props: {
-    url: {
+    sources: {
       type: String,
-      default: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
+      default: 'https://vod.jianka.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
     },
     poster: {
       type: String,
@@ -38,68 +37,40 @@ export default {
     }
   },
   mounted () {
-    const player = this.$refs.videoPlayer
-    // console.log(videojs.IS_IOS)
-    const options = Object.assign({
-      autoplay: false,
-      controls: true,
-      playsinline: IS_IOS, // 阻止IOS设备启用默认的全屏播放
-      webkitPlaysinline: IS_IOS, // 阻止IOS设备启用默认的全屏播放
-      preload: 'auto',
-      // children: [
-      //   'bigPlayButton',
-      //   'controlBar'
-      // ],
-      // nativeControlsForTouch: true,
-      // controlBar: {
-      //   fullscreenToggle: true
-      // },
-      // children: {
-      //   controlBar: {
-      //     fullscreenToggle: false
-      //   }
-      // },
-      // language: 'zh-CN',
-      responsive: true,
-      fluid: true,
-      aspectRatio: '16:9',
-      // poster: '//vjs.zencdn.net/(…)oceans.png',
-      sources: '//vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
-    }, this.options)
-    const _this = this
-    this.player = videojs(player, options, function onPlayerReady () {
-      console.log('onPlayerReady', this)
-      _this.addEvent()
-    })
+    this.createPlayer()
   },
   beforeDestroy () {
-    // this.clearTimer()
+    this.clearTimer()
     // 注销播放器
     this.player && this.player.dispose()
   },
   methods: {
     createPlayer () {
-      const CkPlayer = window.ckplayer
-      this.player = new CkPlayer(Object.assign(
-        {
-          container: '#com-player-box',
-          variable: 'ckplayer',
-          poster: '',
-          video: '',
-          mobileCkControls: true,
-          mobileAutoFull: false,
-          autoPlay: true,
-          h5container: '#com-player-box'
-        },
-        { video: this.url, poster: this.poster },
-        this.config
-      ))
-      this.player && this.addEvent()
+      const ref = this.$refs.videoPlayer
+      const options = Object.assign({
+        autoplay: false,
+        controls: true,
+        playsinline: videojs.browser.IS_IOS, // 阻止IOS设备启用默认的全屏播放
+        webkitPlaysinline: videojs.browser.IS_IOS, // 阻止IOS设备启用默认的全屏播放
+        preload: 'auto',
+        responsive: true,
+        fluid: true,
+        languages: 'zh-cn',
+        aspectRatio: '16:9'
+      }, {
+        sources: this.sources || '',
+        poster: this.poster || ''
+      }, this.options)
+      const _this = this
+      this.player = videojs(ref, options, function onPlayerReady () {
+        // 播放器已经装备完毕
+        _this.addEvent()
+      })
     },
     // 监听播放器事件
     addEvent () {
       // 元数据加载完成时
-      // this.player.addListener('loadedmetadata', this.handleLoaded)
+      this.player.on('loadedmetadata', this.handleLoaded)
       // 开始播放时，记录用户播放数据
       this.player.on('play', this.handlePlay)
       // 播放暂停
@@ -110,7 +81,7 @@ export default {
       this.player.on('ended', this.handleEnded)
     },
     removeEvent () {
-      // this.player.off('loadedmetadata', this.handleLoaded)
+      this.player.off('loadedmetadata', this.handleLoaded)
       this.player.off('play', this.handlePlay)
       this.player.off('pause', this.handlePause)
       this.player.off('error', this.handleError)
@@ -118,28 +89,25 @@ export default {
     },
     // 元数据加载完成时, 开始自动播放
     handleLoaded () {
-      this.player.videoPlay()
+      this.player.play()
       this.doEmit('loaded')
     },
     // 播放开始时，开始记录学员的记录
     handlePlay () {
-      console.log('play')
       this.startLog()
       this.doEmit('play')
     },
     // 播放暂停
     handlePause () {
-      console.log('pause')
       this.doEmit('pause')
     },
     // 播放发生错误时
     handleError () {
-      console.log('error')
+      console.log('ok')
       this.doEmit('error')
     },
     // 播放结束时
     handleEnded () {
-      console.log('end')
       this.doEmit('ended')
     },
     // 记录用户播放时间进度
@@ -147,7 +115,7 @@ export default {
       // 每 10s 触发一次记录
       this.clearTimer()
       this.timer = setInterval(() => {
-        this.thisTime = Math.ceil(this.player.time)
+        this.thisTime = Math.ceil(this.player.currentTime)
         if (this.thisTime !== this.lastTime) {
           this.lastTime = this.thisTime
           this.doEmit('play', this.thisTime)
@@ -157,7 +125,7 @@ export default {
     // 清除定时器
     clearTimer () { clearInterval(this.timer) },
     // 触发事件
-    doEmit (event, time = this.player.time) {
+    doEmit (event, time = this.player.currentTime()) {
       event !== 'play' && this.clearTimer()
       this.$emit('emit', { event, time })
     }
