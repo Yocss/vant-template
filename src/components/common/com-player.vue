@@ -1,23 +1,19 @@
 <template>
   <div class="com-player">
     <!-- 播放器 -->
-    <div id="com-player-box">
-      <video
-        ref="videoPlayer"
-        class="com-player-video video-js vjs-big-play-centered"
-      />
-    </div>
+    <div id="com-player-box" />
   </div>
 </template>
 <script>
 import 'video.js/dist/video-js.min.css'
 import videojs from 'video.js'
+const zh = require('video.js/dist/lang/zh-CN.json')
 export default {
   name: 'ComPlayer',
   props: {
-    sources: {
+    src: {
       type: String,
-      default: 'https://vod.jianka.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
+      default: ''
     },
     poster: {
       type: String,
@@ -36,6 +32,16 @@ export default {
       thisTime: 0
     }
   },
+  watch: {
+    src () {
+      this.reCreatePlayer()
+    },
+    'options.sources': {
+      handler () {
+        this.reCreatePlayer()
+      }
+    }
+  },
   mounted () {
     this.createPlayer()
   },
@@ -45,27 +51,49 @@ export default {
     this.player && this.player.dispose()
   },
   methods: {
+    reCreatePlayer () {
+      this.clearTimer() // 清除定时器
+      if (this.player) {
+        this.removeEvent() // 移除事件监听
+        this.player.dispose() // 注销播放器
+        this.player = null
+      }
+      this.createPlayer() // 重建播放器
+    },
     createPlayer () {
-      const ref = this.$refs.videoPlayer
-      const options = Object.assign({
-        autoplay: false,
-        controls: true,
-        playsinline: videojs.browser.IS_IOS, // 阻止IOS设备启用默认的全屏播放
-        webkitPlaysinline: videojs.browser.IS_IOS, // 阻止IOS设备启用默认的全屏播放
-        preload: 'auto',
-        responsive: true,
-        fluid: true,
-        languages: 'zh-cn',
-        aspectRatio: '16:9'
-      }, {
-        sources: this.sources || '',
-        poster: this.poster || ''
-      }, this.options)
-      const _this = this
-      this.player = videojs(ref, options, function onPlayerReady () {
-        // 播放器已经装备完毕
-        _this.addEvent()
-      })
+      // 只有当视频地址存在时，才创建播放器
+      if (this.src || this.options.sources) {
+        // 使用中文
+        videojs.addLanguage('zh-CN', zh)
+        // 1、创建video标签
+        const video = videojs.createEl('video', {}, { class: 'com-player-video video-js vjs-big-play-centered' })
+        const ref = document.getElementById('com-player-box').appendChild(video)
+        // 2、合并 options
+        const options = Object.assign({
+          autoplay: false,
+          controls: true,
+          playsinline: videojs.browser.IS_IOS, // 阻止IOS设备启用默认全屏
+          webkitPlaysinline: videojs.browser.IS_IOS, // 阻止IOS设备启用默认全屏
+          preload: 'auto',
+          responsive: true,
+          fluid: true,
+          aspectRatio: '16:9',
+          controlBar: {
+            timeControls: {
+              TimeDisplay: true
+            }
+          }
+        }, {
+          sources: this.src || '',
+          poster: this.poster || ''
+        }, this.options)
+        const _this = this
+        // 3、创建播放器
+        this.player = videojs(ref, options, function onPlayerReady () {
+          // 播放器创建成功，开始监听播放器事件
+          _this.addEvent()
+        })
+      }
     },
     // 监听播放器事件
     addEvent () {
@@ -89,7 +117,7 @@ export default {
     },
     // 元数据加载完成时, 开始自动播放
     handleLoaded () {
-      this.player.play()
+      // this.player.play()
       this.doEmit('loaded')
     },
     // 播放开始时，开始记录学员的记录
@@ -103,7 +131,7 @@ export default {
     },
     // 播放发生错误时
     handleError () {
-      console.log('ok')
+      // console.log('ok')
       this.doEmit('error')
     },
     // 播放结束时
@@ -136,11 +164,20 @@ export default {
 .com-player
   display block
   width 100%
+  height 100%
   #com-player-box
     width 100%
     height 100%
     .com-player-video
       font-size 12PX
+      .vjs-poster
+        background-size 100% 100%
+      .vjs-big-play-button
+        width 1.63332em
+        border-radius 50%
+      &.vjs-big-play-centered
+        .vjs-big-play-button
+          margin-left -.81666em
       .vjs-progress-holder
         height .2em
         user-select none
