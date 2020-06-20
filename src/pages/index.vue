@@ -53,7 +53,8 @@ export default {
       uploader.create({
         // accept: ['jpg'],
         // limit: { min: 120, max: 1120, unit: 'KB' },
-        size: { width: 300, height: 200 }
+        // size: { width: 776, height: 489, scale: 2 }
+        size: { width: 1230, height: 776, scale: 1 }
       })
     },
     toggleVideo () {
