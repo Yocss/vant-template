@@ -2,10 +2,10 @@
   <base-page
     class="home-index"
   >
-    <com-player
+    <!-- <com-player
       :src="video"
       poster="https://sihong-lm.oss-cn-shanghai.aliyuncs.com/other/11583918726b3f16216fcf40b6223d04fd501e4b8f8.jpg"
-    />
+    /> -->
     <p>
       <a
         href="javascript:void(0);"
@@ -13,16 +13,21 @@
         @click="toggleVideo"
       >切换</a>
     </p>
+    <div
+      style="width: 200px; height: 100px; background-color: #f33; color: #fff;"
+      @click="handleUpload"
+    >上传图片</div>
     <router-link to="/news">
       去新闻页
     </router-link>
   </base-page>
 </template>
 <script>
+import { Uploader } from '@/assets/js/uploader.js'
 export default {
   name: 'HomeIndex',
   components: {
-    ComPlayer: () => import('@/components/common/com-player.vue')
+    // ComPlayer: () => import('@/components/common/com-player.vue')
   },
   data () {
     return {
@@ -40,9 +45,17 @@ export default {
   //   }, 3000)
   // }
   created () {
-    this.asyncData()
+    // this.asyncData()
   },
   methods: {
+    handleUpload () {
+      const uploader = new Uploader()
+      uploader.create({
+        // accept: ['jpg'],
+        // limit: { min: 120, max: 1120, unit: 'KB' },
+        size: { width: 300, height: 200 }
+      })
+    },
     toggleVideo () {
       const url = ['https://vod.jiankao.wang/sv/161c514-1714d59df34/161c514-1714d59df34.mp4', 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4']
       const i = url.findIndex(e => e === this.video)
