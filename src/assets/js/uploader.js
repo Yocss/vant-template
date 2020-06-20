@@ -41,7 +41,7 @@ export class Uploader {
       // console.log(blobs)
       // 判断文件类型是否符合要求
       try {
-        _this.doVaildate(blobs)
+        await _this.doVaildate(blobs)
         // console.log(res)
         console.log('fkfkfk okkkk')
       } catch (err) {
@@ -51,17 +51,18 @@ export class Uploader {
     })
   }
 
-  doVaildate (blobs) {
-    blobs.forEach(blob => {
+  async doVaildate (blobs) {
+    // blobs.forEach(blob => {
+    for (let i = 0; i < blobs.length; i++) {
       // 1、校验文件类型是否符合
-      this.vaildateFileType(blob)
+      this.vaildateFileType(blobs[i])
       // 2、校验文件大小是否符合
-      this.vaildateFileLimit(blob)
+      this.vaildateFileLimit(blobs[i])
       // 3、校验图片尺寸大小
-      if (blob.type.indexOf('image') === 0) {
-        this.vaildateImageSize(blob)
+      if (blobs[i].type.indexOf('image') === 0) {
+        await this.vaildateImageSize(blobs[i])
       }
-    })
+    }
   }
 
   /**
@@ -77,13 +78,51 @@ export class Uploader {
     // console.log(this.size)
     const { width, height, error, scale, aspectRatio } = this.size
     let bool = false
-    console.log(width, height, error, scale, aspectRatio)
+    // console.log(width, height, error, scale, aspectRatio)
     const { realWidth, realHeight } = await this.computeImageSize(blob)
-    console.log(realHeight, realWidth)
+    console.log(realWidth, realHeight)
     if (width === 0 && height === 0) {
       bool = true
     } else if (width > 0 && height > 0 && !aspectRatio) {
-      // 没搞完
+      // 1. 处理误差, 缩放
+      this.handleCondOne({ width, height, error, scale, realHeight, realWidth })
+    }
+    return bool
+  }
+
+  handleCondOne ({ width, height, error, scale, realHeight, realWidth }) {
+    let bool = false
+    const err = { status: false, message: '' }
+    // 1、无误差时，计算宽高比是否一致
+    if (error === 0) {
+      const ratio1 = Math.floor(width / height * 100)
+      const ratio2 = Math.floor(realWidth / realHeight * 100)
+      // 1-a. 确保比例一致
+      const bRatio = ratio2 === ratio1
+      // 1-b. 确保尺寸在合理范围内
+      let bScale = true
+      if (scale === 1) {
+        bScale = realWidth === width && realHeight === height
+      } else if (scale < 1) {
+        bScale = realWidth >= width * scale && realHeight >= height * scale
+      } else {
+        bScale = realWidth <= width * scale && realHeight <= height * scale
+      }
+      bool = bRatio && bScale
+      if (!bool) {
+        err.message = `图片尺寸不符，建议尺寸：${width}×${height}px`
+      }
+    }
+    // // 2、误差为 0-1 之间的小数时
+    // if (error > 0 && error < 1) {
+
+    // }
+    // // 3、误差为整数时
+    // if (error > 1) {
+
+    // }
+    if (!bool) {
+      throw err
     }
     return bool
   }
@@ -199,7 +238,7 @@ export class Uploader {
     const s = Object.assign({
       width: 0, // 图片宽度, 正整数 单位为像素
       height: 0, // 图片高度, 正整数 单位为像素
-      scale: 1, // 缩放比 大于 0 的数
+      scale: 1, // 缩放比 大于 0 的数, 最高精度为2, 多余的直接丢弃
       error: 0, // 误差, 正整数 单位为像素
       aspectRatio: '' // 宽高比 4:3, 如果设定了宽高比，将以 width 或 height 不为0的数为基准，两个同时设置的情况下，以 width 为基准
     }, size)
@@ -216,7 +255,7 @@ export class Uploader {
     if (aspectRatio !== '' && !(/\d+:\d+/.test(aspectRatio))) {
       throw new Error('aspectRatio（宽高比）请使用标准的数学比例写法，如 16:9')
     }
-    return { height, width, scale, error, aspectRatio }
+    return { height, width, scale: Math.floor(scale * 100) / 100, error, aspectRatio }
   }
 
   // 将 limit 统一格式化为以字节单位的量
