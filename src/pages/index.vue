@@ -54,7 +54,10 @@ export default {
         // accept: ['jpg'],
         // limit: { min: 120, max: 1120, unit: 'KB' },
         // size: { width: 776, height: 489, scale: 2 }
-        size: { width: 1230, height: 776, scale: 1 }
+        // size: { width: 620, height: 300, scale: 1.5, error: 0.03 }
+        // size: { width: 620, height: 300, aspectRatio: '31:15' }
+        // size: { aspectRatio: '31:15' }
+        size: { width: 620, height: 300, scale: 0.7, error: 5 }
       })
     },
     toggleVideo () {

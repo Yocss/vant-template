@@ -1,5 +1,23 @@
 // import OSS from 'ali-oss'
 
+/**
+ * OSS文件上传类 + 文件文件类型校验、文件大小校验、图片尺寸校验)
+ * create(option)
+ * option: {
+ *  stsUrl: String 获取STS授权的地址
+ *  stsNum: 要上传的文件数量
+ *  stsType: 要上传的文件类型
+ *  accept: [Array, String]
+ *  limit: { min: 0, max: 2, unit: 'kb' },
+ *  size: {
+ *    width: 0, // 图片宽度, 0 表示不限制
+ *    height: 0, // 图片高度, 0 表示不限制
+ *    scale: 1, 缩放率，width和height为最大上传尺寸，width和height为最小上传尺寸
+ *    error: 0, 宽高允许的误差值
+ *    aspectRatio: '', 图片宽高比
+ *  }
+ * }
+ */
 export class Uploader {
   // 初始化
   // constructor () {
@@ -70,58 +88,174 @@ export class Uploader {
    * @param {BLOB} blob 图片
    * 1、只设定了宽或高， 则代表高或宽不限制
    * 2、error 代表允许的误差值
-   * 3、设置了 aspectRatio，则 scale 失效，并以一条宽或高为基准，宽高同时不为0时以宽为基准
+   * 3、若设置 aspectRatio，则 scale, error 失效
    * 4、scale 表缩放，大于1时，宽高为最小值， 小于1时，宽度为最大值, 未设置宽高时不生效
    */
   // 校验图片尺寸是否符合要求
   async vaildateImageSize (blob) {
-    // console.log(this.size)
     const { width, height, error, scale, aspectRatio } = this.size
     let bool = false
-    // console.log(width, height, error, scale, aspectRatio)
     const { realWidth, realHeight } = await this.computeImageSize(blob)
-    console.log(realWidth, realHeight)
-    if (width === 0 && height === 0) {
+    // 1. 限定比例, 比例被限定时，不容许误差存在
+    if (aspectRatio) {
+      this.vaildateAspectRatio({ width, height, realWidth, realHeight, aspectRatio })
+    // 2. 自由尺寸
+    } else if (width === 0 && height === 0) {
       bool = true
-    } else if (width > 0 && height > 0 && !aspectRatio) {
-      // 1. 处理误差, 缩放
-      this.handleCondOne({ width, height, error, scale, realHeight, realWidth })
+    // 3. 限定宽高, 并处理相应的缩放和误差
+    } else {
+      this.handleLimit({ width, height, error, scale, realHeight, realWidth })
     }
     return bool
   }
 
-  handleCondOne ({ width, height, error, scale, realHeight, realWidth }) {
+  handleLimit ({ width, height, error, scale, realHeight, realWidth }) {
     let bool = false
     const err = { status: false, message: '' }
     // 1、无误差时，计算宽高比是否一致
     if (error === 0) {
-      const ratio1 = Math.floor(width / height * 100)
-      const ratio2 = Math.floor(realWidth / realHeight * 100)
+      let r1 = 0
+      let r2 = 0
+      if (width > 0 && height > 0) {
+        r1 = Math.floor(width / height * 100)
+        r2 = Math.floor(realWidth / realHeight * 100)
+      }
       // 1-a. 确保比例一致
-      const bRatio = ratio2 === ratio1
+      const bRatio = r1 === r2
       // 1-b. 确保尺寸在合理范围内
       let bScale = true
       if (scale === 1) {
         bScale = realWidth === width && realHeight === height
+        if (width === 0 || height === 0) {
+          bScale = realWidth === width || realHeight === height
+        }
       } else if (scale < 1) {
         bScale = realWidth >= width * scale && realHeight >= height * scale
+        if (width === 0) {
+          bScale = realHeight >= height * scale && realHeight <= height
+        }
+        if (height === 0) {
+          // console.log(realWidth, width, width * scale)
+          bScale = realWidth >= width * scale && realWidth <= width
+        }
       } else {
         bScale = realWidth <= width * scale && realHeight <= height * scale
+        if (width === 0) {
+          bScale = realHeight <= height * scale && realHeight >= height
+        }
+        if (height === 0) {
+          bScale = realWidth <= width * scale && realWidth >= width
+        }
       }
       bool = bRatio && bScale
-      if (!bool) {
-        err.message = `图片尺寸不符，建议尺寸：${width}×${height}px`
+    } else {
+      const params = { realWidth, realHeight, width, height, error }
+      const bScale = this.vaildateError(params)
+      let bwErr = true
+      let bhErr = true
+      let wError = error * 1
+      let hError = error * 1
+      // 当 error 为小于 1 的小数时，计算出等比的误差值
+      if (error < 1) {
+        wError = width * error
+        hError = height * error
+      }
+      // console.log(wError, hError)
+      if (scale === 1) {
+        bwErr = width > 0 ? Math.abs(realWidth - width) <= wError : true
+        bhErr = height > 0 ? Math.abs(realHeight - height) <= hError : true
+      } else if (scale > 1) {
+        bwErr = width > 0 ? (realWidth >= width - wError) && (realWidth <= Math.floor(width * scale) + wError) : true
+        bhErr = height > 0 ? (realHeight >= height - hError) && (realHeight <= Math.floor(height * scale) + hError) : true
+      } else {
+        bwErr = width > 0 ? (realWidth <= width + wError) && (realWidth >= Math.floor(width * scale) - wError) : true
+        bhErr = height > 0 ? (realHeight <= height + hError) && (realHeight >= Math.floor(height * scale) - hError) : true
+      }
+      bool = bScale && (bwErr && bhErr)
+    }
+    if (!bool) {
+      let message = `图片尺寸不符，建议尺寸：${width}×${height}px`
+      if (width === 0) {
+        message = `图片尺寸不符，图片建议高度：${height}px`
+      }
+      if (height === 0) {
+        message = `图片尺寸不符，建议尺寸：${width}px`
+      }
+      err.message = message
+      throw err
+    }
+    return bool
+  }
+
+  // 验证误差是否在合理范围内
+  vaildateError ({ realWidth, realHeight, width, height, error }) {
+    let minScale = 0
+    let maxScale = 0
+    if (width > 0 && height > 0) {
+      if (error < 1) {
+        minScale = Math.floor((width - width * error) / (height + height * error) * 100)
+        maxScale = Math.floor((width + width * error) / (height - height * error) * 100)
+      } else {
+        minScale = Math.floor((width - error) / (height + error) * 100)
+        maxScale = Math.floor((width + error) / (height - error) * 100)
       }
     }
-    // // 2、误差为 0-1 之间的小数时
-    // if (error > 0 && error < 1) {
+    const realScale = Math.floor(realWidth / realHeight * 100)
+    let status = minScale <= realScale && realScale <= maxScale
+    if (width === 0) {
+      const mError = error < 1 ? height * error : error
+      status = realHeight >= height - mError && realHeight <= height + mError
+    }
+    if (height === 0) {
+      const mError = error < 1 ? width * error : error
+      status = realWidth >= width - mError && realWidth <= width + mError
+    }
+    if (!status) {
+      let message = `误差过大，建议尺寸：${width}×${height}px`
+      if (width === 0) {
+        message = `误差过大，图片建议高度：${height}px`
+      }
+      if (height === 0) {
+        message = `误差过大，图片建议宽度：${width}px`
+      }
+      const err = { status, message }
+      throw err
+    }
+    return status
+  }
 
-    // }
-    // // 3、误差为整数时
-    // if (error > 1) {
-
-    // }
+  // 验证图片比例是否在合理范围内
+  vaildateAspectRatio ({ realWidth, realHeight, width, height, aspectRatio }) {
+    const ratio = aspectRatio.split(':')
+    let bool = false
+    let cw = width
+    let ch = height
+    if (width > 0 && height > 0) {
+      const w = realWidth / ratio[0]
+      const h = realHeight / ratio[1]
+      bool = w === Math.floor(w) && h === Math.floor(h) && w === h
+    } else if (width > 0) {
+      const w = width / ratio[0]
+      const h = realHeight / ratio[1]
+      bool = h === Math.floor(h) && w <= h
+      cw = width
+      ch = w * ratio[1]
+    } else if (height > 0) {
+      const h = height / ratio[1]
+      const w = realWidth / ratio[0]
+      bool = w === Math.floor(w) && w <= h
+      cw = h * ratio[0]
+      ch = height
+    } else {
+      // 如果比例出现错误，并给出建议尺寸
+      const w = realWidth / ratio[0]
+      const h = realHeight / ratio[1]
+      bool = w === Math.floor(w) && h === Math.floor(h) && w === h
+      cw = Math.floor(w) * ratio[0]
+      ch = Math.floor(w) * ratio[1]
+    }
     if (!bool) {
+      const err = { status, message: `图片比例不符：建议尺寸${cw}×${ch}px` }
       throw err
     }
     return bool
@@ -250,12 +384,38 @@ export class Uploader {
       throw new Error('scale 必须是大于 0 的数')
     }
     if (error < 0) {
-      throw new Error('error 必须是大于 0 的整数')
+      throw new Error('error 必须是大于 1 的整数 或 小于 1 的小数')
     }
-    if (aspectRatio !== '' && !(/\d+:\d+/.test(aspectRatio))) {
-      throw new Error('aspectRatio（宽高比）请使用标准的数学比例写法，如 16:9')
+    if (aspectRatio !== '') {
+      const ratio = aspectRatio.split(':')
+      if (!(/\d+:\d+/.test(aspectRatio))) {
+        throw new Error('aspectRatio（宽高比）请使用标准的数学比例写法，如 16:9')
+      } else if (height > 0 && width > 0) {
+        const w = width / ratio[0]
+        const h = height / ratio[1]
+        if (w !== Math.floor(w) || h !== Math.floor(h) || w !== h) {
+          throw new Error('aspectratio、with、height数据无法完成验算！')
+        }
+      } else if (height > 0) {
+        const h = height / ratio[1]
+        if (h !== Math.floor(h)) {
+          throw new Error('aspectratio 与 height 验算过程中出现小数！')
+        }
+      } else if (width > 0) {
+        const w = width / ratio[0]
+        if (w !== Math.floor(w)) {
+          throw new Error('aspectratio 与 width 验算过程中出现小数！')
+        }
+      }
+      // 校组定义的比例是否合理
     }
-    return { height, width, scale: Math.floor(scale * 100) / 100, error, aspectRatio }
+    return {
+      height,
+      width,
+      scale: Math.floor(scale * 100) / 100,
+      error: error < 1 ? error : Math.floor(error),
+      aspectRatio
+    }
   }
 
   // 将 limit 统一格式化为以字节单位的量
