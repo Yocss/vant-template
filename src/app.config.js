@@ -23,7 +23,7 @@ export default {
     error: [403],
     reTimes: 3,
     timeout: 5000,
-    useJson: true, // 是否使用序列化的字符串
+    useJson: false, // 是否使用序列化的字符串
     // header: ['X-Requested-TK'],
     httpStatus: {
       403: '你没有权限访问',
