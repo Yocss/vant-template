@@ -31,7 +31,8 @@ Vue.mixin({
           message: '您尚未登录，请登录后继续操作'
         }).then(() => {
           // 去登录
-          console.log('开启登录框')
+          // console.log('开启登录框')
+          this.$store.dispatch('SetStore', { account: true })
         })
       }
       return this.isLogin
