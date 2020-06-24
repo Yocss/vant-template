@@ -14,6 +14,7 @@
       v-else
       class="layout"
     />
+    <com-account />
     <!-- loading status -->
     <transition name="fade">
       <div v-show="loading" class="layout-loading filter flex-center">
@@ -27,6 +28,9 @@ import LayoutsDefault from './default.vue'
 import LayoutsHome from './home.vue'
 export default {
   name: 'AppContainer',
+  components: {
+    ComAccount: () => import('@/components/common/account-panel/index.vue')
+  },
   computed: {
     animate () {
       return this.$store.state.animate
