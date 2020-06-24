@@ -37,7 +37,13 @@ axios.interceptors.request.use(
         customParams = { ...data }
         break
     }
-    Object.assign(data, params, customParams)
+    const test = {
+      device: '0',
+      region: '360000',
+      profession: '38',
+      version: '0'
+    }
+    Object.assign(data, params, customParams, test)
     return config
   },
   (err) => {
@@ -139,10 +145,7 @@ async function request (url, data, opt, method = 'post', times = req.reTimes) {
  */
 async function getData (url = '', data = {}, option = {}, tip = true, method = 'post') {
   const response = await request(url, data, option, method)
-  // console.log('-=-=-=-=-=-')
-  // console.log(response)
-  // console.log('-=-=-=-=-=-')
-  const bool = req.success.includes(response.code)
+  const bool = req.success.includes(response.code * 1)
   const result = bool ? response.data || {} : false
   // 无结果 && tip = true 时弹出提示框
   if (!result && tip) {
