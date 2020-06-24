@@ -8,12 +8,14 @@ export default {
     // description: '',
   },
   api: {
-    development: 'https://www.fastmock.site/mock/4a968665bccbba113c09ebaebc8b40fb/vant',
+    development: 'http://lm.sihongedu.com',
+    // development: 'https://www.fastmock.site/mock/4a968665bccbba113c09ebaebc8b40fb/vant',
     production: ''
   },
   port: 5188,
   keys: {
-    token: '_tk_',
+    cookie: 30, // cookie 保存时长，0表示不保存, 单位为天
+    token: '_tk_', // 务必确保值存在，否则页面刷新时将失去用户的登录状态
     user: '_us_'
   },
   // cnzz 网页分析
