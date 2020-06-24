@@ -68,7 +68,15 @@ export class AliossFileUploader extends Validate {
         // 1. 检查文件类型，大小，尺寸是否合法
         await _this.doVaildate(blobs)
         // 2. 调用sts方法 或 使用参数 初始化
-        sts && sts({ number: 1, type: 0 })
+        let config = {}
+        switch (_this.getTypeOf(sts)) {
+          case 'function':
+            config = await sts({ number: 1, type: 0 })
+            break
+          case 'object':
+            config = sts
+        }
+        console.log(config)
         // 3. 执行上传
       } catch (err) {
         console.log(err)
