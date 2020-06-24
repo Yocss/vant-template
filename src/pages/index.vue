@@ -63,28 +63,18 @@ export default {
     async handleUpload () {
       // 1. 使用sts参数初始化
       // await this.getSTS()
-      const alioss = new AliossFileUploader({ oss: this.config })
-      // 2. 执行上传任务
-      // alioss.upload()
-      alioss.create({
-        // accept: ['jpg'],
-        // limit: { min: 120, max: 1120, unit: 'KB' },
-        // size: { width: 776, height: 489, scale: 2 }
-        // size: { width: 620, height: 300, scale: 1.5, error: 0.03 }
-        // size: { width: 620, height: 300, aspectRatio: '31:15' }
-        // size: { aspectRatio: '31:15' }
-        size: { width: 620, height: 300, scale: 0.7, error: 5 }
-      })
+      if (this.checkLogin()) {
+        const alioss = new AliossFileUploader({ oss: this.config })
+        // 2. 执行上传任务
+        // alioss.upload()
+        alioss.create({
+          size: { width: 620, height: 300, scale: 0.7, error: 5 }
+        }, this.getSTS)
+      }
     },
-    async getSTS () {
-      const data = await this.$http.post('upload/stsUpload', {
-        number: 1,
-        type: 0,
-        device: 0,
-        profession: 0,
-        region: '360000',
-        token: '722639b183504ffa3e31c86ec5c5ba18'
-      }, { baseURL: 'http://ss.sihongedu.com' })
+    async getSTS (query = {}) {
+      const token = this.$store.state.token
+      const data = await this.$http.post('upload/stsUpload', Object.assign(query, { token }))
       console.log(data)
     },
     toggleVideo () {

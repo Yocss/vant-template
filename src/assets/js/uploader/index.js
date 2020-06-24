@@ -38,7 +38,7 @@ export class AliossFileUploader extends Validate {
   }
 
   // 创建 input[type=file]
-  create (opt = {}, callBack) {
+  create (opt = {}, sts, callBack) {
     const options = Object.assign({
       stsUrl: '/upload/stsUpload',
       stsNum: 1,
@@ -68,6 +68,7 @@ export class AliossFileUploader extends Validate {
         // 1. 检查文件类型，大小，尺寸是否合法
         await _this.doVaildate(blobs)
         // 2. 调用sts方法 或 使用参数 初始化
+        sts && sts({ number: 1, type: 0 })
         // 3. 执行上传
       } catch (err) {
         console.log(err)
