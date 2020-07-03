@@ -29,38 +29,44 @@ import OSS from 'ali-oss'
  */
 export class AliossFileUploader extends Validate {
   // 初始化
-  constructor (props) {
+  constructor (props = {}) {
     super(props)
-    this.accept = props.accept
-    this.size = props.size
-    this.limit = props.limit
-    this.alioss = new OSS(props.oss)
+    this.accept = props.accept || ''
+    this.size = props.size || { width: 0, height: 0, scale: 1, aspectRatio: '', error: 0 }
+    this.limit = props.limit || { min: 0, max: 2, unit: 'MB' }
+    this.https = true
+    this.alioss = null
+    // this.alioss = new OSS(props.oss)
   }
 
   // 创建 input[type=file]
   create (opt = {}, sts, callBack) {
     const options = Object.assign({
-      stsUrl: '/upload/stsUpload',
-      stsNum: 1,
-      stsType: 1,
+      // stsUrl: '/upload/stsUpload',
+      // stsNum: 1,
+      // stsType: 1,
+      https: true,
       accept: '',
       size: { width: 0, height: 0, scale: 1, aspectRatio: '', error: 0 },
       limit: { min: 0, max: 2, unit: 'MB' }
     }, opt)
     // 初始化参数
+    this.https = options.https
     this.accept = this.formatAccept(options.accept)
     this.size = this.formatSize(options.size)
     this.limit = this.formatLimit(options.limit)
     // 1. 创建input
     const fileInput = document.createElement('input')
     fileInput.type = 'file'
-    if (options.stsNum > 1) {
-      fileInput.multiple = 'multiple'
-    }
+    // if (options.stsNum > 1) {
+    //   fileInput.multiple = 'multiple'
+    // }
+    fileInput.multiple = 'multiple'
     fileInput.click()
     const _this = this
     // 2. 监听用户选取的文件
     fileInput.addEventListener('change', async function (e) {
+      // console.log(e.path)
       const blobs = e.path[0].files
       // console.log(blobs)
       // 判断文件类型是否符合要求
@@ -68,30 +74,82 @@ export class AliossFileUploader extends Validate {
         // 1. 检查文件类型，大小，尺寸是否合法
         await _this.doVaildate(blobs)
         // 2. 调用sts方法 或 使用参数 初始化
+        const files = []
+        Object.keys(blobs).forEach(i => {
+          files.push({
+            index: i,
+            file: blobs[i],
+            orgName: blobs[i].name,
+            size: blobs[i].size,
+            extName: _this.getExtName(blobs[i].name),
+            upName: '',
+            url: '',
+            progress: 0,
+            checkpoint: null
+          })
+        })
         let config = {}
+        let fileNames = []
         switch (_this.getTypeOf(sts)) {
-          case 'function':
-            config = await sts({ number: 1, type: 0 })
+          case 'function': {
+            const res = await sts({ number: files.length, type: 100000 })
+            config = res.config
+            fileNames = res.files
             break
+          }
           case 'object':
             config = sts
         }
-        console.log(config)
-        // 3. 执行上传
+        // console.log(config)
+        if (config.stsToken) {
+          _this.alioss = new OSS(config)
+          // 3. 执行上传
+          // console.log(blobs)
+          files.forEach((e, i) => {
+            e.upName = `${fileNames[i]}.${e.extName}`
+            _this.doUpload(e, files, callBack)
+          })
+        }
       } catch (err) {
         console.log(err)
       }
     })
   }
 
-  async doUpload (blob, fn) {
+  async doUpload (ele, list, fn) {
     // const uploader = new OSS()
     const _this = this
-    await this.alioss.multipartUpload('file.name', blob, {
-      partSize: _this.setPartSize(blob),
-      progress: async function (p, checkpoint) {
-        fn && fn(Math.floor(p * 100), checkpoint)
+    const data = list.reduce((arr = [], e) => {
+      return arr.concat({
+        index: e.index,
+        progress: e.progress,
+        size: e.size,
+        file: e.orgName,
+        name: e.upName,
+        checkpoint: null,
+        url: e.url
+      })
+    }, [])
+    const { name, res } = await this.alioss.multipartUpload(ele.upName, ele.file, {
+      partSize: _this.setPartSize(ele.file),
+      progress: async function (progress, checkpoint) {
+        // console.log(p, checkpoint)
+        data[ele.index].progress = Math.floor(progress * 100)
+        data[ele.index].checkpoint = checkpoint
+        fn && fn(data)
       }
     })
+    // console.log(file)
+    if (name && res.status * 1 === 200) {
+      const url = res.requestUrls[0]
+      const i = url.indexOf(name)
+      let file = url.slice(0, i) + name
+      if (this.https && file.indexOf('https:') !== 0) {
+        file = 'https:' + url.slice(5)
+      }
+      // console.log(file)
+      data[ele.index].url = file
+      fn && fn(data)
+    }
   }
 }

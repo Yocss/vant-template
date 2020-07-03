@@ -64,18 +64,36 @@ export default {
       // 1. 使用sts参数初始化
       // await this.getSTS()
       if (this.checkLogin()) {
-        const alioss = new AliossFileUploader({ oss: this.config })
+        // const alioss = new AliossFileUploader({ oss: this.config })
+        const alioss = new AliossFileUploader()
         // 2. 执行上传任务
         // alioss.upload()
+        console.log(alioss)
         alioss.create({
-          size: { width: 620, height: 300, scale: 0.7, error: 5 }
-        }, this.getSTS)
+          limit: { max: 15, unit: 'mb' }
+          // size: { width: 620, height: 300, scale: 0.7, error: 5 }
+        }, this.getSTS, this.callBack)
       }
+    },
+    callBack (list) {
+      console.log(list[0])
     },
     async getSTS (query = {}) {
       const token = this.$store.state.token
       const data = await this.$http.post('upload/stsUpload', Object.assign(query, { token }))
-      console.log(data)
+      // console.log(data)
+      if (data) {
+        const config = {
+          accessKeyId: data.accessKeyId || '',
+          accessKeySecret: data.accessKeySecret || '',
+          endpoint: data.endpoint || '',
+          region: data.region || '',
+          bucket: data.bucket || '',
+          stsToken: data.securityToken || ''
+        }
+        const files = data.file_name.map(e => data.path + e)
+        return { config, files }
+      }
     },
     toggleVideo () {
       const url = ['https://vod.jiankao.wang/sv/161c514-1714d59df34/161c514-1714d59df34.mp4', 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4']

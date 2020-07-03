@@ -8,7 +8,8 @@ export default {
     // description: '',
   },
   api: {
-    development: 'http://lm.sihongedu.com',
+    // development: 'http://lm.sihongedu.com',
+    development: 'https://lm.sihongapi.top',
     // development: 'https://www.fastmock.site/mock/4a968665bccbba113c09ebaebc8b40fb/vant',
     production: ''
   },
