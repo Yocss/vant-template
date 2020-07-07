@@ -1,5 +1,6 @@
 <template>
   <base-page
+    :head="false"
     class="home-index"
   >
     <!-- <com-player
@@ -9,7 +10,7 @@
     <p>
       <a
         href="javascript:void(0);"
-        style="display: block; width: 120px; height: 60px; margin: 15px; background-color: #f33; color: #fff;"
+        style="display: block; width: 120px; height: 60px; margin: 0 15px; background-color: #f33; color: #fff;"
         @click="toggleVideo"
       >切换</a>
     </p>
@@ -23,7 +24,7 @@
   </base-page>
 </template>
 <script>
-import { AliossFileUploader } from '@/assets/js/uploader/index.js'
+import { Alioss } from 'alioss-file-uploader'
 export default {
   name: 'HomeIndex',
   components: {
@@ -31,57 +32,23 @@ export default {
   },
   data () {
     return {
-      video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4',
-      config: {
-        accessKeyId: 'STS.NTwR17qG7u25A58sR8pxH7QDT',
-        accessKeySecret: 'DYT8vnShZ85q3bF5zM6ZLSYsmYpovwHXEq5ury8mF6rJ',
-        bucket: 'sihong-ss',
-        endpoint: 'http://oss-cn-shanghai.aliyuncs.com',
-        region: 'oss-cn-shanghai',
-        securityToken: 'CAIS/AF1q6Ft5B2yfSjIr5fCGYuDnJgWwvDeQxOJl1JtfPdk2JTvtjz2IHBOf3loBegZsP02lWlR7vsZlrlXd7ZkXEj5betv0ZRszw2FO3hXXSFzq+5qsoasPETOITyZtZagToeUZdfZfejXGDKgvyRvwLz8WCy/Vli+S/OggoJmadJlNWvRL0AxZrFsKxBltdUROFbIKP+pKWSKuGfLC1dysQcO4gEWq4bHm5PCskeP1wOqm7FI+Nuue6LJNZc8YM1NNP6ux/Fze6b71ypd1gNH7q8ejtYfqW2c7onBWwYPukzXarOMr4Z1SRJhYq8zF6Ne6eL7kfBoeQdPOD1WWnwagAF0egvIXwf3eat1R5nkIB118sq8GEsquae6kG7aINsCQlN2FfrjiYjiGlZ11OXPd/TFfwp9+YZDbROpLHIZD56ASxNVsosCSBsDF23EUwI8mqDS9iG5pAZdrUcBB3gAmaxCwutCrnB0ue6nz2rvKFpoaZfkQ/udG774TII8EZFX6g==',
-        // file_name: ['3'],
-        // path: 'cert/',
-        paths: [],
-        url: 'https://sihong-ss.oss-cn-shanghai.aliyuncs.com/'
-      }
+      video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
     }
-  },
-  // computed: {
-  //   loading () {
-  //     return this.$store.state.loading
-  //   }
-  // },
-  // mounted () {
-  //   setInterval(() => {
-  //     this.$store.dispatch('SetStore', { loading: !this.loading })
-  //   }, 3000)
-  // }
-  created () {
-    // this.asyncData()
   },
   methods: {
     async handleUpload () {
-      // 1. 使用sts参数初始化
-      // await this.getSTS()
       if (this.checkLogin()) {
-        // const alioss = new AliossFileUploader({ oss: this.config })
-        const alioss = new AliossFileUploader()
-        // 2. 执行上传任务
-        // alioss.upload()
-        console.log(alioss)
-        alioss.create({
-          limit: { max: 15, unit: 'mb' }
-          // size: { width: 620, height: 300, scale: 0.7, error: 5 }
-        }, this.getSTS, this.callBack)
+        const alioss = new Alioss()
+        alioss.upload(this.getSTS, this.callBack)
       }
     },
     callBack (list) {
-      console.log(list[0])
+      console.log(list)
     },
-    async getSTS (query = {}) {
+    async getSTS (list) {
+      const query = { number: list.length, type: 100 }
       const token = this.$store.state.token
       const data = await this.$http.post('upload/stsUpload', Object.assign(query, { token }))
-      // console.log(data)
       if (data) {
         const config = {
           accessKeyId: data.accessKeyId || '',

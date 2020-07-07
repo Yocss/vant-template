@@ -1,13 +1,13 @@
 <template>
   <base-page
     :head="false"
-    class="error-index"
+    class="mine-index"
   >
-    404
+    个人中心
   </base-page>
 </template>
 <script>
 export default {
-  name: 'ErrorIndex'
+  name: 'MineIndex'
 }
 </script>

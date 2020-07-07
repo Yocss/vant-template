@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import News from './pages/news.js'
+import Mine from './pages/mine.js'
 
 Vue.use(VueRouter)
 
@@ -12,6 +13,7 @@ const routes = [
     meta: { title: '首页' }
   },
   ...News,
+  ...Mine,
   {
     path: '*',
     name: 'Error',

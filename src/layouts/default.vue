@@ -11,11 +11,6 @@
 <script>
 export default {
   name: 'LayoutsDefault',
-  data () {
-    return {
-      // animate: 'slideIn'
-    }
-  },
   computed: {
     animate () {
       return this.$store.state.animate
