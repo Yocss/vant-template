@@ -48,6 +48,10 @@ hooks()
 
 // set page's layout
 function setLayout (to) {
-  const layout = to.meta.layout || 'default'
+  let layout = to.meta.layout || 'default'
+  const footNav = store.state.footNav
+  if (footNav.some(e => e.name === to.name)) {
+    layout = 'home'
+  }
   store.dispatch('SetStore', { layout })
 }
