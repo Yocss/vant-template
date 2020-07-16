@@ -12,8 +12,10 @@ export default {
     from: null
   },
   footNav: [ // 页脚导航条
-    { title: '首页', name: 'HomeIndex' },
-    { title: '我的', name: 'MineIndex' }
+    { title: '首页', name: 'HomeIndex', icon: 'wap-home-o' },
+    { title: '题库', name: 'StudyIndex', icon: 'points' },
+    { title: '资料', name: 'SourceIndex', icon: 'newspaper-o' },
+    { title: '我的', name: 'MineIndex', icon: 'manager-o' }
   ],
   token: getToken(),
   // 登录框

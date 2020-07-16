@@ -9,8 +9,9 @@
       >
         <div class="item">
           <div class="icon">
+            <!-- :name="isActive(nav.name) ? icons[nav.name][0] : icons[nav.name][0]" -->
             <van-icon
-              :name="isActive(nav.name) ? icons[nav.name][1] : icons[nav.name][0]"
+              :name="nav.icon"
             />
           </div>
           <p
@@ -31,8 +32,10 @@ export default {
   data () {
     return {
       icons: {
-        HomeIndex: ['wap-home-o', 'wap-home'],
-        MineIndex: ['manager-o', 'manager']
+        HomeIndex: ['wap-home-o'],
+        StudyIndex: ['points'],
+        SourceIndex: ['newspaper-o'],
+        MineIndex: ['manager-o']
       }
     }
   },
