@@ -18,6 +18,7 @@
       style="width: 200px; height: 100px; background-color: #f33; color: #fff;"
       @click="handleUpload"
     >上传图片</div>
+    <com-music />
     <router-link to="/news">
       去新闻页
     </router-link>
@@ -28,11 +29,13 @@ import { Alioss } from 'alioss-file-uploader'
 export default {
   name: 'HomeIndex',
   components: {
-    // ComPlayer: () => import('@/components/common/com-player.vue')
+    // ComPlayer: () => import('@/components/common/com-player.vue'),
+    ComMusic: () => import('@/components/common/com-music.vue')
   },
   data () {
     return {
-      video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
+      // video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
+      video: 'https://sihong-lm.oss-cn-shanghai.aliyuncs.com/assets/balloon.mp3'
     }
   },
   methods: {
@@ -63,7 +66,8 @@ export default {
       }
     },
     toggleVideo () {
-      const url = ['https://vod.jiankao.wang/sv/161c514-1714d59df34/161c514-1714d59df34.mp4', 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4']
+      // const url = ['https://vod.jiankao.wang/sv/161c514-1714d59df34/161c514-1714d59df34.mp4', 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4']
+      const url = 'https://sihong-lm.oss-cn-shanghai.aliyuncs.com/assets/balloon.mp3'
       const i = url.findIndex(e => e === this.video)
       this.video = i > 0 ? url[0] : url[1]
     },
