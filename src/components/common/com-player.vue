@@ -1,7 +1,10 @@
 <template>
   <div class="com-player">
     <!-- 播放器 -->
-    <div id="com-player-box" />
+    <div
+      :class="{'is-music': isMusic}"
+      id="com-player-box"
+    />
   </div>
 </template>
 <script>
@@ -29,7 +32,14 @@ export default {
       player: null,
       timer: null,
       lastTime: 0,
-      thisTime: 0
+      thisTime: 0,
+      video: null
+    }
+  },
+  computed: {
+    isMusic () {
+      const i = this.src.lastIndexOf('.')
+      return this.src.slice(i + 1).toLowerCase() === 'mp3'
     }
   },
   watch: {
@@ -66,23 +76,27 @@ export default {
         // 使用中文
         videojs.addLanguage('zh-CN', zh)
         // 1、创建video标签
-        const video = videojs.createEl('video', {}, { class: 'com-player-video video-js vjs-big-play-centered' })
+        const cls = 'com-player-video video-js vjs-big-play-centered'
+        const video = videojs.dom.createEl('video', {}, { class: cls })
         const ref = document.getElementById('com-player-box').appendChild(video)
         // 2、合并 options
         const options = Object.assign({
-          autoplay: false,
-          controls: true,
+          autoplay: false, // 自动播放
+          controls: true, // 显示控制栏
           playsinline: videojs.browser.IS_IOS, // 阻止IOS设备启用默认全屏
           webkitPlaysinline: videojs.browser.IS_IOS, // 阻止IOS设备启用默认全屏
-          preload: 'auto',
-          responsive: true,
-          fluid: true,
-          aspectRatio: '16:9',
+          preload: 'auto', // 预加载
+          responsive: true, // 响应式
+          fluid: true, // 自适应
+          language: 'zh-CN', // 播放器语言
+          aspectRatio: '16:9', // 画面比例
           controlBar: {
-            timeControls: {
-              TimeDisplay: true
-            }
-          }
+            // timeControls: {
+            //   // TimeDisplay: true,
+            //   // remainingTimeDisplay: true
+            // }
+          },
+          playbackRates: [0.5, 1, 1.5, 2]
         }, {
           sources: this.src || '',
           poster: this.poster || ''
@@ -92,9 +106,18 @@ export default {
         this.player = videojs(ref, options, function onPlayerReady () {
           // 播放器创建成功，开始监听播放器事件
           _this.addEvent()
+          // _this.video = document.getElementsByTagName('video')[0]
+          // console.log(_this.video)
+          // _this.video.addEventListener('click', function () {
+          // console.log('ok')
+          // })
         })
       }
     },
+    // addVideoClick () {
+    //   console.log('ok')
+    //   this.player.pause()
+    // },
     // 监听播放器事件
     addEvent () {
       // 元数据加载完成时
@@ -116,28 +139,18 @@ export default {
       this.player.off('ended', this.handleEnded)
     },
     // 元数据加载完成时, 开始自动播放
-    handleLoaded () {
-      // this.player.play()
-      this.doEmit('loaded')
-    },
+    handleLoaded () { this.doEmit('loaded') },
     // 播放开始时，开始记录学员的记录
     handlePlay () {
       this.startLog()
       this.doEmit('play')
     },
     // 播放暂停
-    handlePause () {
-      this.doEmit('pause')
-    },
+    handlePause () { this.doEmit('pause') },
     // 播放发生错误时
-    handleError () {
-      // console.log('ok')
-      this.doEmit('error')
-    },
+    handleError () { this.doEmit('error') },
     // 播放结束时
-    handleEnded () {
-      this.doEmit('ended')
-    },
+    handleEnded () { this.doEmit('ended') },
     // 记录用户播放时间进度
     startLog () {
       // 每 10s 触发一次记录
@@ -168,8 +181,25 @@ export default {
   #com-player-box
     width 100%
     height 100%
+    &.is-music
+      .com-player-video // 音乐模式下限制全屏按钮
+        .vjs-fullscreen-control
+          display none
+      .vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar
+        opacity 1 !important
     .com-player-video
       font-size 12PX
+      &.vjs-paused
+        .vjs-big-play-button
+          display block
+      .vjs-picture-in-picture-control // 画中画按钮
+        display none
+      .vjs-remaining-time // 剩余时间
+        display block
+        span
+          display none
+        .vjs-remaining-time-display
+          display initial
       .vjs-poster
         background-size 100% 100%
       .vjs-big-play-button

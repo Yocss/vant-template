@@ -3,11 +3,11 @@
     :head="false"
     class="home-index"
   >
-    <!-- <com-player
+    <com-player
       :src="video"
       poster="https://sihong-lm.oss-cn-shanghai.aliyuncs.com/other/11583918726b3f16216fcf40b6223d04fd501e4b8f8.jpg"
-    /> -->
-    <p>
+    />
+    <!-- <p>
       <a
         href="javascript:void(0);"
         style="display: block; width: 120px; height: 60px; margin: 0 15px; background-color: #f33; color: #fff;"
@@ -17,11 +17,11 @@
     <div
       style="width: 200px; height: 100px; background-color: #f33; color: #fff;"
       @click="handleUpload"
-    >上传图片</div>
-    <com-music />
-    <router-link to="/news">
+    >上传图片</div> -->
+    <!-- <com-music /> -->
+    <!-- <router-link to="/news">
       去新闻页
-    </router-link>
+    </router-link> -->
   </base-page>
 </template>
 <script>
@@ -29,8 +29,8 @@ import { Alioss } from 'alioss-file-uploader'
 export default {
   name: 'HomeIndex',
   components: {
-    // ComPlayer: () => import('@/components/common/com-player.vue'),
-    ComMusic: () => import('@/components/common/com-music.vue')
+    ComPlayer: () => import('@/components/common/com-player.vue')
+    // ComMusic: () => import('@/components/common/com-music.vue')
   },
   data () {
     return {

@@ -2,18 +2,14 @@
   <div class="com-music">
     <div class="control-bar flex-align-center">
       <div
+        id="controlBtn"
         style="padding: 20px; border: 1px solid #ccc;"
-        @click="playControl('play')"
         v-text="'播放'"
+        @click="controllPlay"
       />
       <div
         style="padding: 20px; border: 1px solid #ccc;"
-        @click="playControl('pause')"
-        v-text="'暂停'"
-      />
-      <div
-        style="padding: 20px; border: 1px solid #ccc;"
-        @click="playControl('muted')"
+        @click="setMuted"
         v-text="'静音'"
       />
     </div>
@@ -40,40 +36,39 @@ export default {
       audioCtx: null,
       gainNode: null,
       track: null, // 轨迹
+      audio: {
+        player: null,
+        AudioContext: null,
+        audioCtx: null,
+        gainNode: null,
+        track: null // 轨迹
+      },
       options: {
         muted: false,
         volume: 60
       }
     }
   },
-  mounted () {
-    // const AudioContext = window.AudioContext || window.webkitAudioContext
-    // this.audioCtx = new AudioContext()
-    this.player = this.$refs.music
-    // this.track = this.audioCtx.createMediaElementSource(this.player)
-    // this.gainNode = this.audioCtx.createGain()
-    // this.track.connect(this.gainNode).connect(this.audioCtx.destination)
-  },
   methods: {
-    playControl (type) {
-      // if (this.audioCtx.state === 'suspended') {
-      //   this.audioCtx.resume()
-      // }
-      switch (type) {
-        case 'play':
-          this.player.play()
-          break
-        case 'pause':
-          this.player.pause()
-          break
-        case 'muted': {
-          this.options.volume = 0
-          this.options.muted = true
-          // this.player.load()
-          // console.log(this.gainNode.gain.value)
-          // this.gainNode.gain.value = 0
-          break
-        }
+    controllPlay (e) {
+      this.$toast('ha')
+      this.createAudio()
+      if (this.audio.audioCtx.state === 'suspended') {
+        this.auido.audioCtx.resume()
+      }
+      this.audio.player.play()
+    },
+    setMuted () {
+      this.audio.gainNode.gain.value = 0
+    },
+    createAudio () {
+      if (!this.audio.AudioContext) {
+        this.audio.AudioContext = window.AudioContext || window.webkitAudioContext
+        this.audio.audioCtx = new this.audio.AudioContext()
+        this.audio.player = this.$refs.music
+        this.audio.track = this.audio.audioCtx.createMediaElementSource(this.audio.player)
+        this.audio.gainNode = this.audio.audioCtx.createGain()
+        this.audio.track.connect(this.audio.gainNode).connect(this.audio.audioCtx.destination)
       }
     },
     canPlay (e) {
