@@ -106,11 +106,6 @@ export default {
         this.player = videojs(ref, options, function onPlayerReady () {
           // 播放器创建成功，开始监听播放器事件
           _this.addEvent()
-          // _this.video = document.getElementsByTagName('video')[0]
-          // console.log(_this.video)
-          // _this.video.addEventListener('click', function () {
-          // console.log('ok')
-          // })
         })
       }
     },
@@ -124,12 +119,21 @@ export default {
       this.player.on('loadedmetadata', this.handleLoaded)
       // 开始播放时，记录用户播放数据
       this.player.on('play', this.handlePlay)
+      // this.player.on('playing', function (e) {
+      //   console.log(e)
+      // })
       // 播放暂停
       this.player.on('pause', this.handlePause)
       // 发生错误时
       this.player.on('error', this.handleError)
       // 播放完成时
       this.player.on('ended', this.handleEnded)
+
+      this.video = document.getElementsByTagName('video')[0]
+      // console.log(this.video)
+      this.video.addEventListener('click', function () {
+        console.log('ok')
+      })
     },
     removeEvent () {
       this.player.off('loadedmetadata', this.handleLoaded)
@@ -178,6 +182,15 @@ export default {
   display block
   width 100%
   height 100%
+  .player-control
+    padding 32px
+    .player
+      border 1px solid #ccc
+      width 120px
+      height 60px
+      text-align center
+      line-height 58px
+      border-radius 8px
   #com-player-box
     width 100%
     height 100%
@@ -187,11 +200,19 @@ export default {
           display none
       .vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar
         opacity 1 !important
+      .vjs-poster // 音乐模式下不隐藏背景图
+        display block !important
     .com-player-video
       font-size 12PX
-      &.vjs-paused
+      &.vjs-paused.vjs-has-started
         .vjs-big-play-button
           display block
+          .vjs-icon-placeholder::before
+            content '\f103'
+        &.vjs-ended
+          .vjs-big-play-button
+            .vjs-icon-placeholder::before
+              content '\f116'
       .vjs-picture-in-picture-control // 画中画按钮
         display none
       .vjs-remaining-time // 剩余时间

@@ -4,6 +4,7 @@
     class="home-index"
   >
     <com-player
+      ref="comPlayer"
       :src="video"
       poster="https://sihong-lm.oss-cn-shanghai.aliyuncs.com/other/11583918726b3f16216fcf40b6223d04fd501e4b8f8.jpg"
     />
@@ -22,6 +23,21 @@
     <!-- <router-link to="/news">
       去新闻页
     </router-link> -->
+    <button
+      @click="handlePlay"
+    >
+      去播放
+    </button>
+    <button
+      @click="handlePause"
+    >
+      去暂停
+    </button>
+    <button
+      @click="handleMuted"
+    >
+      去静音
+    </button>
   </base-page>
 </template>
 <script>
@@ -34,11 +50,20 @@ export default {
   },
   data () {
     return {
-      // video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
-      video: 'https://sihong-lm.oss-cn-shanghai.aliyuncs.com/assets/balloon.mp3'
+      video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
+      // video: 'https://sihong-lm.oss-cn-shanghai.aliyuncs.com/assets/balloon.mp3'
     }
   },
   methods: {
+    handlePlay () {
+      this.$refs.comPlayer.player.play()
+    },
+    handlePause () {
+      this.$refs.comPlayer.player.pause()
+    },
+    handleMuted () {
+      this.$refs.comPlayer.player.muted(!this.$refs.comPlayer.player.muted())
+    },
     async handleUpload () {
       if (this.checkLogin()) {
         const alioss = new Alioss()
