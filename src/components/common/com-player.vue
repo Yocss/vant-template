@@ -33,14 +33,15 @@ export default {
       timer: null,
       lastTime: 0,
       thisTime: 0,
-      video: null
+      video: null,
+      isMusic: false
     }
   },
   computed: {
-    isMusic () {
-      const i = this.src.lastIndexOf('.')
-      return this.src.slice(i + 1).toLowerCase() === 'mp3'
-    }
+    // isMusic () {
+    //   const i = this.src.lastIndexOf('.')
+    //   return this.src.slice(i + 1).toLowerCase() === 'mp3'
+    // }
   },
   watch: {
     src () {
@@ -122,6 +123,7 @@ export default {
       // this.player.on('playing', function (e) {
       //   console.log(e)
       // })
+      this.player.on('timeupdate', this.handleProgress)
       // 播放暂停
       this.player.on('pause', this.handlePause)
       // 发生错误时
@@ -138,17 +140,25 @@ export default {
     removeEvent () {
       this.player.off('loadedmetadata', this.handleLoaded)
       this.player.off('play', this.handlePlay)
+      this.player.off('timeupdate', this.handleProgress)
       this.player.off('pause', this.handlePause)
       this.player.off('error', this.handleError)
       this.player.off('ended', this.handleEnded)
     },
     // 元数据加载完成时, 开始自动播放
-    handleLoaded () { this.doEmit('loaded') },
+    handleLoaded () { this.doEmit('loaded', this.player.duration()) },
     // 播放开始时，开始记录学员的记录
     handlePlay () {
+      const src = this.player.src()
+      // console.log(src)
+      console.log(this.player.isAudio())
+      const i = src.lastIndexOf('.')
+      this.isMusic = src.slice(i + 1).toLowerCase() === 'mp3'
+
       this.startLog()
-      this.doEmit('play')
+      this.doEmit('play', this.player.duration())
     },
+    handleProgress () { this.doEmit('timeupdate', this.player.currentTime()) },
     // 播放暂停
     handlePause () { this.doEmit('pause') },
     // 播放发生错误时
@@ -194,28 +204,11 @@ export default {
   #com-player-box
     width 100%
     height 100%
-    &.is-music
-      .com-player-video // 音乐模式下限制全屏按钮
-        .vjs-fullscreen-control
-          display none
-      .vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar
-        opacity 1 !important
-      .vjs-poster // 音乐模式下不隐藏背景图
-        display block !important
     .com-player-video
       font-size 12PX
-      &.vjs-paused.vjs-has-started
-        .vjs-big-play-button
-          display block
-          .vjs-icon-placeholder::before
-            content '\f103'
-        &.vjs-ended
-          .vjs-big-play-button
-            .vjs-icon-placeholder::before
-              content '\f116'
-      .vjs-picture-in-picture-control // 画中画按钮
+      .vjs-picture-in-picture-control // 关闭画中画按钮
         display none
-      .vjs-remaining-time // 剩余时间
+      .vjs-remaining-time // 显示剩余时间
         display block
         span
           display none
@@ -223,6 +216,7 @@ export default {
           display initial
       .vjs-poster
         background-size 100% 100%
+        display block !important
       .vjs-big-play-button
         width 1.63332em
         border-radius 50%
@@ -256,5 +250,37 @@ export default {
           top 50%
           margin-top -0.5em
           z-index 1
+      // 播放器的几种状态
+      &.vjs-has-started.vjs-paused // 播放暂停: 显示大号按钮，poster
+        .vjs-big-play-button // 暂停时显示中间大号播放按钮
+          display block
+          .vjs-icon-placeholder::before // 暂停时按钮图标变为暂停图标
+            content '\f103'
+      &.vjs-has-started.vjs-playing // 播放中: 隐藏大号按钮，poster
+        .vjs-poster
+          opacity 0
+      &.vjs-has-started.vjs-ended // 播放结束: 显示大号按钮，poser
+        .vjs-poster
+          opacity 1
+        .vjs-big-play-button
+          .vjs-icon-placeholder::before
+            content '\f116'
+        .vjs-poster // 音乐模式下不隐藏背景图
+          opacity 1
+    // 音乐模式
+    &.is-music
+      display none
+      .com-player-video // 音乐模式下限制全屏按钮
+        .vjs-fullscreen-control
+          display none
+      // .vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar
+      // opacity 1 !important
+      .vjs-has-started
+        .vjs-control-bar
+          opacity 0
+        &.vjs-playing // 音乐模式下，不隐藏背景图
+          .vjs-poster
+            display block !important
+            opacity 1
     // video
 </style>

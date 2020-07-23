@@ -7,6 +7,7 @@
       ref="comPlayer"
       :src="video"
       poster="https://sihong-lm.oss-cn-shanghai.aliyuncs.com/other/11583918726b3f16216fcf40b6223d04fd501e4b8f8.jpg"
+      @emit="handleEmit"
     />
     <!-- <p>
       <a
@@ -23,38 +24,87 @@
     <!-- <router-link to="/news">
       去新闻页
     </router-link> -->
-    <button
-      @click="handlePlay"
+    <div style="margin: 20px;">
+      <button
+        @click="handlePlay"
+      >
+        去播放
+      </button>
+      <button
+        @click="handlePause"
+      >
+        去暂停
+      </button>
+      <button
+        @click="handleMuted"
+      >
+        去静音
+      </button>
+      <button
+        @click="handleNext"
+      >
+        下一首
+      </button>
+    </div>
+    <div
+      style="margin-top: 40px; padding: 50px;"
     >
-      去播放
-    </button>
-    <button
-      @click="handlePause"
-    >
-      去暂停
-    </button>
-    <button
-      @click="handleMuted"
-    >
-      去静音
-    </button>
+      <van-slider
+        v-model="progress"
+        @change="onChange"
+      />
+    </div>
   </base-page>
 </template>
 <script>
 import { Alioss } from 'alioss-file-uploader'
+import { Slider } from 'vant'
 export default {
   name: 'HomeIndex',
   components: {
+    [Slider.name]: Slider,
     ComPlayer: () => import('@/components/common/com-player.vue')
     // ComMusic: () => import('@/components/common/com-music.vue')
   },
   data () {
     return {
-      video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
-      // video: 'https://sihong-lm.oss-cn-shanghai.aliyuncs.com/assets/balloon.mp3'
+      total: 0,
+      progress: 0,
+      video2: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4',
+      video: 'https://sihong-lm.oss-cn-shanghai.aliyuncs.com/assets/balloon.mp3'
+      // video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
     }
   },
   methods: {
+    handleEmit (e) {
+      console.log(e)
+      switch (e.event) {
+        case 'play':
+          this.total = e.time
+          break
+        case 'loaded':
+          if (isNaN(this.total)) {
+            this.total = e.time
+          }
+          break
+        case 'timeupdate': {
+          const t = e.time
+          if (this.total > 0) {
+            const value = t / this.total * 100
+            this.progress = value
+          }
+          break
+        }
+        case 'ended':
+          // this.handleNext()
+          break
+      }
+    },
+    onChange (v) {
+      const t = this.total * v / 100
+      this.$refs.comPlayer.player.currentTime(t)
+      // this.$refs.comPlayer.player.playbackRate(3) // 设置播放速度
+    },
     handlePlay () {
       this.$refs.comPlayer.player.play()
     },
@@ -63,6 +113,10 @@ export default {
     },
     handleMuted () {
       this.$refs.comPlayer.player.muted(!this.$refs.comPlayer.player.muted())
+    },
+    handleNext () {
+      this.$refs.comPlayer.player.src(this.video2)
+      this.handlePlay()
     },
     async handleUpload () {
       if (this.checkLogin()) {
