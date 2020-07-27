@@ -59,19 +59,25 @@
 <script>
 import { Alioss } from 'alioss-file-uploader'
 import { Slider } from 'vant'
+import ComPlayer from 'av-player'
 export default {
   name: 'HomeIndex',
   components: {
     [Slider.name]: Slider,
-    ComPlayer: () => import('@/components/common/com-player.vue')
+    ComPlayer
+    // ComPlayer: () => import('@/components/common/com-player.vue')
     // ComMusic: () => import('@/components/common/com-music.vue')
   },
   data () {
     return {
       total: 0,
       progress: 0,
-      video2: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4',
-      video: 'https://sihong-lm.oss-cn-shanghai.aliyuncs.com/assets/balloon.mp3'
+      video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
+      // video: 'https://sihong-lm.oss-cn-shanghai.aliyuncs.com/assets/balloon.mp3'
+      // video: 'http://111.13.111.242/otttv.bj.chinamobile.com/PLTV/88888888/224/3221226225/1.m3u8'
+      // video: 'http://boliu.jiankao.wang/aaa/bbb.m3u8?auth_key=1611109831-0-0-3e1c6dd0d8a195de929f602b5a563fe4'
+      // video: 'https://vod.jiankao.wang/c5836ab4bf354a888c2270af4622a51e/1164b87649d8cfba09a73762c2914629-sd.m3u8'
+      // video: 'rtmp://boliu.jiankao.wang/aaa/bbb?auth_key=1611110861-0-0-f514266afed1cc8510b8f8744d8d0926'
       // video: 'https://vod.jiankao.wang/7c01465c94e449eeb2c795909d6b5eca/84b66563011d4411b801161ac54cd95a-6a3736091d286b946486bc6e0da0fdc7-sd.mp4'
     }
   },
@@ -115,7 +121,7 @@ export default {
       this.$refs.comPlayer.player.muted(!this.$refs.comPlayer.player.muted())
     },
     handleNext () {
-      this.$refs.comPlayer.player.src(this.video2)
+      this.$refs.comPlayer.player.src(this.video)
       this.handlePlay()
     },
     async handleUpload () {
