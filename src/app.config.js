@@ -8,10 +8,9 @@ export default {
     // description: '',
   },
   api: {
-    // development: 'http://lm.sihongedu.com',
-    development: 'https://lm.sihongapi.top',
     // development: 'https://www.fastmock.site/mock/4a968665bccbba113c09ebaebc8b40fb/vant',
-    production: ''
+    development: '',
+    production: '/api'
   },
   port: 5188,
   keys: {
@@ -20,7 +19,8 @@ export default {
     user: '_us_'
   },
   // cnzz 网页分析
-  cnzz: 'https://s9.cnzz.com/z_stat.php?id=1278259705',
+  // cnzz: 'https://s9.cnzz.com/z_stat.php?id=1278259705',
+  cnzz: '',
   httpRequest: {
     success: [0, 2000],
     error: [403],
