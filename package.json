@@ -11,7 +11,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@axmine/helper": "^1.1.0",
+    "@axmine/helper": "^1.1.1",
     "alioss-file-uploader": "0.0.8",
     "av-player": "^1.0.5",
     "axios": "^0.21.0",
