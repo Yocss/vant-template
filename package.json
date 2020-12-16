@@ -13,7 +13,7 @@
   "dependencies": {
     "@axmine/helper": "^1.1.4",
     "alioss-file-uploader": "0.0.8",
-    "av-player": "^1.0.6",
+    "av-player": "^1.0.8",
     "axios": "^0.21.0",
     "core-js": "^3.6.4",
     "lodash": "^4.17.20",
