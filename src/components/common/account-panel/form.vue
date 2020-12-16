@@ -240,6 +240,7 @@ export default {
         this.openTimer()
         const form = { type: this.type, phone: this.form.user.value }
         const data = await this.$http.post('account/verify_code', form)
+        console.log(data)
         if (data) {
           // data.code !== 0 && this.closeTimer() && this.$notify({
           //   type: 'danger',
